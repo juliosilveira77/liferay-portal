@@ -132,6 +132,7 @@ definition {
             AssertElementPresent(
             key_details = "Request Information",
             locator1 = "EVPUtils#DETAILS_PAGE");
+        
         }
     }
 }
