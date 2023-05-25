@@ -68,6 +68,7 @@ definition {
         
         }
     }
+    
     @description = "This is a test for LPS-166361. Verify that only the right columns are displayed from Employee View (Request ID, Request Type, Organization, Grant Type, Grant Value, Service Hours and Status)."
     @priority = 3
     test EmployeeCanSeeRequestDetails {
