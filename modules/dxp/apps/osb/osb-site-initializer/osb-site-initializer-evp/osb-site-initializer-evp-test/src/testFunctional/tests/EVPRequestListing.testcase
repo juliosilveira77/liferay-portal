@@ -1,0 +1,137 @@
+@component-name = "OSB Site Initializer EVP"
+definition {
+
+	var baseURL = PropsUtil.get("portal.url");
+
+	property custom.properties = "feature.flag.LPS-169981=true";
+	property osgi.modules.includes = "osb-site-initializer-evp";
+	property portal.release = "false";
+	property portal.upstream = "true";
+	property release.feature.flags.disable.DISABLE_PRIVATE_LAYOUTS = "true";
+	property testray.main.component.name = "OSB Site Initializer EVP";
+
+	setUp {
+		task ("Set up instance and sign in") {
+			TestCase.setUpPortalInstance();
+
+			User.firstLoginPG();
+		}
+
+		task ("Create a new EVP Site") {
+			EVPUtils.addEVPSite();
+		
+        }
+                       
+        task ("Navigate to EVP Site and Sign In") {
+			EVPUtils.gotoEVP();
+		}
+    
+    }
+    
+    tearDown {
+		var testPortalInstance = PropsUtil.get("test.portal.instance");
+
+		if (${testPortalInstance} == "true") {
+			PortalInstances.tearDownCP();
+		}
+		else {
+			JSONGroup.deleteGroupByName(groupName = "EVP Portal");
+		}
+	}
+    @description = "This is a test for LPS-166360. Verify that only the right columns are displayed from Employee View."
+    @priority = 5
+    test CanViewColumnsOnListing {
+        
+        task ("Add a Employee user with a Employee role") {
+         JSONUser.addUserWithRole(
+             roleTitle = "Employee",
+             userEmailAddress = "Employee@liferay.com",
+             userFirstName = "Employee",
+             userLastName = "Employee",
+             userScreenName = "Employee");
+         
+         JSONUser.setFirstPassword(
+             agreeToTermsAndAnswerReminderQuery = "true",
+             requireReset = "false",
+             userEmailAddress = "Employee@liferay.com");
+        }
+        
+        task ("When enter the Request") {
+        Click(
+            key_entryName = "Request",
+            locator1 = "EVPUtils#VIEW_ENTRY_NAME_ON_PAGE");
+        
+        }
+        
+        task ("Then I confirm that the elements are present") {
+        EVPUtils.assertColumnsPage(columnsList = "Request Id,Request Type,Organization,Grant Type,Grant Value,Service Hours,Status");
+        
+        }
+    }
+    @description = "This is a test for LPS-166361. Verify that only the right columns are displayed from Employee View (Request ID, Request Type, Organization, Grant Type, Grant Value, Service Hours and Status)."
+    @priority = 3
+    test EmployeeCanSeeRequestDetails {
+        
+        task ("Add a Employee user with a Employee role") {
+         JSONUser.addUserWithRole(
+             roleTitle = "Employee",
+             userEmailAddress = "Employee@liferay.com",
+             userFirstName = "Employee",
+             userLastName = "Employee",
+             userScreenName = "Employee");
+         
+         JSONUser.setFirstPassword(
+             agreeToTermsAndAnswerReminderQuery = "true",
+             requireReset = "false",
+             userEmailAddress = "Employee@liferay.com");
+        }
+        
+        task ("When enter the Request Kebab") {
+        EVPUtils.enterRequestKebab(
+            entryName = "Request",
+            columnsKebab = 45301,
+            optionKebab = "Details");
+        
+        }
+        
+        task ("Then Confirm that you are on the details page") {
+        AssertElementPresent(
+            key_details = "Request Information",
+            locator1 = "EVPUtils#DETAILS_PAGE");
+        }
+    }
+    
+    @description = "This is a test for LPS-166359. Verify that the Staff can see the request details trough the detail option on kebab."
+    @priority = 3
+    test ManagerCanSeeRequestDetails {
+        
+        task ("Add a manager user with a manager role") {
+            JSONUser.addUserWithRole(
+                roleTitle = "EVP manager",
+                userEmailAddress = "manager@liferay.com",
+                userFirstName = "manager",
+                userLastName = "manager",
+                userScreenName = "manager");
+            
+            JSONUser.setFirstPassword(
+                agreeToTermsAndAnswerReminderQuery = "true",
+                requireReset = "false",
+                userEmailAddress = "manager@liferay.com");
+        
+        }
+        
+        task ("When enter the Request Kebab") {
+            EVPUtils.enterRequestKebab(
+            entryName = "Request",
+            columnsKebab = 45301,
+            optionKebab = "Details");
+        
+        }
+        
+        task ("Then Confirm that you are on the details page") {
+            AssertElementPresent(
+            key_details = "Request Information",
+            locator1 = "EVPUtils#DETAILS_PAGE");
+        }
+    }
+}
