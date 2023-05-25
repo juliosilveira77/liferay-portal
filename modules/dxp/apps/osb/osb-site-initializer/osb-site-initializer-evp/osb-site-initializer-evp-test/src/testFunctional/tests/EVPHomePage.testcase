@@ -1,0 +1,84 @@
+@component-name = "OSB Site Initializer EVP"
+definition {
+
+	var baseURL = PropsUtil.get("portal.url");
+
+	property custom.properties = "feature.flag.LPS-169981=true";
+	property osgi.modules.includes = "osb-site-initializer-evp";
+	property portal.release = "false";
+	property portal.upstream = "true";
+	property release.feature.flags.disable.DISABLE_PRIVATE_LAYOUTS = "true";
+	property testray.main.component.name = "OSB Site Initializer EVP";
+
+	setUp {
+		task ("Set up instance and sign in") {
+			TestCase.setUpPortalInstance();
+
+			User.firstLoginPG();
+		}
+
+		task ("Create a new EVP Site") {
+			EVPUtils.addEVPSite();
+		}
+				
+		task ("Navigate to EVP Site and Sign In") {
+		EVPUtils.gotoEVP();
+		
+		}
+	
+	}
+
+	tearDown {
+		var testPortalInstance = PropsUtil.get("test.portal.instance");
+
+		if (${testPortalInstance} == "true") {
+			PortalInstances.tearDownCP();
+		}
+		else {
+			JSONGroup.deleteGroupByName(groupName = "EVP");
+		}
+	}
+
+	@description = "This is a test for LPS-182727. Verify that Requests option only will be displayed to logged-in users."
+	@priority = 4
+	test CannotSeeRequestPageWithoutBeLoggedIn {
+		
+		task ("Add a Employee user with a Employee role") {
+			JSONUser.addUserWithRole(
+				roleTitle = "Employee",
+				userEmailAddress = "Employee@liferay.com",
+				userFirstName = "Employee",
+				userLastName = "Employee",
+				userScreenName = "Employee");
+		
+			JSONUser.setFirstPassword(
+				agreeToTermsAndAnswerReminderQuery = "true",
+				requireReset = "false",
+				userEmailAddress = "Employee@liferay.com");
+		
+		}
+		
+		task ("When the element is found") {
+			AssertElementPresent(
+				key_navItem = "Request",
+				locator1 = "EVPNavigation#NAV_LINK");
+		}
+
+		task ("Then logout") {
+			User.logoutPG();
+		}
+
+		task ("And enter the URL logged out") {
+			var portalURL = PropsUtil.get("portal.url");
+
+			Navigator.openSpecificURL(url = "${portalURL}/web/evp-portal");
+		}
+		
+		task ("Then the element is not found") {
+			AssertElementNotPresent(
+				key_navItem = "Request",
+				locator1 = "EVPNavigation#NAV_LINK");
+		}
+	}
+
+}
