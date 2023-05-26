@@ -20,12 +20,10 @@ definition {
 		task ("Create a new EVP Site") {
 			EVPUtils.addEVPSite();
 		}
-				
+
 		task ("Navigate to EVP Site and Sign In") {
-		EVPUtils.gotoEVP();
-		
+			EVPUtils.gotoEVP();
 		}
-	
 	}
 
 	tearDown {
@@ -42,7 +40,6 @@ definition {
 	@description = "This is a test for LPS-182727. Verify that Requests option only will be displayed to logged-in users."
 	@priority = 4
 	test CannotSeeRequestPageWithoutBeLoggedIn {
-		
 		task ("Add a Employee user with a Employee role") {
 			JSONUser.addUserWithRole(
 				roleTitle = "Employee",
@@ -50,14 +47,13 @@ definition {
 				userFirstName = "Employee",
 				userLastName = "Employee",
 				userScreenName = "Employee");
-		
+
 			JSONUser.setFirstPassword(
 				agreeToTermsAndAnswerReminderQuery = "true",
 				requireReset = "false",
 				userEmailAddress = "Employee@liferay.com");
-		
 		}
-		
+
 		task ("When the element is found") {
 			AssertElementPresent(
 				key_navItem = "Request",
@@ -73,7 +69,7 @@ definition {
 
 			Navigator.openSpecificURL(url = "${portalURL}/web/evp-portal");
 		}
-		
+
 		task ("Then the element is not found") {
 			AssertElementNotPresent(
 				key_navItem = "Request",

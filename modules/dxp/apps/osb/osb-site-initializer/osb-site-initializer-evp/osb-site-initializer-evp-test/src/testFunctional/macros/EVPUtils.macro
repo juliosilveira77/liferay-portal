@@ -8,6 +8,30 @@ definition {
 			siteTemplateName = "EVP");
 	}
 
+	@summary = "Inside the Request page confirms if the columns that are requested are present"
+	macro assertColumnsPage {
+		for (var columnsPage : list ${columnsList}) {
+			AssertElementPresent(
+				key_columns = ${columnsPage},
+				locator1 = "EVPUtils#REQUEST_COLUMNS");
+		}
+	}
+
+	@summary = "In the EVP enter the Request click on the kebab and choose an option and enter"
+	macro enterRequestKebab {
+		Click(
+			key_entryName = ${entryName},
+			locator1 = "EVPUtils#VIEW_ENTRY_NAME_ON_PAGE");
+
+		Click(
+			key_number = ${columnsKebab},
+			locator1 = "EVPUtils#KEBAB_MENU_FIELD");
+
+		Click(
+			key_option = ${optionKebab},
+			locator1 = "EVPUtils#KEBAB_OPTION");
+	}
+
 	@summary = "Navigating to EVP needs an extra click on Sign In which will redirect to Okta"
 	macro gotoEVP {
 		Navigator.openSiteURL(siteName = "EVP Portal");
@@ -16,30 +40,5 @@ definition {
 			Click(locator1 = "EVPUtils#SIGN_IN");
 		}
 	}
-
-	@summary = "Inside the Request page confirms if the columns that are requested are present"
-	macro assertColumnsPage {
-        for (var columnsPage : list ${columnsList}) {
-            AssertElementPresent(
-                key_columns = ${columnsPage},
-                locator1 = "EVPUtils#REQUEST_COLUMNS");
-        }
-    }
-
-	@summary = "In the EVP enter the Request click on the kebab and choose an option and enter"
-	macro enterRequestKebab {
-		Click(
-            key_entryName = ${entryName},
-            locator1 = "EVPUtils#VIEW_ENTRY_NAME_ON_PAGE");
-        
-        Click(
-            key_number = ${columnsKebab},
-            locator1 = "EVPUtils#KEBAB_MENU_FIELD");
-        
-        Click(
-            key_option = ${optionKebab},
-            locator1 = "EVPUtils#KEBAB_OPTION");
-        
-    }
 
 }
