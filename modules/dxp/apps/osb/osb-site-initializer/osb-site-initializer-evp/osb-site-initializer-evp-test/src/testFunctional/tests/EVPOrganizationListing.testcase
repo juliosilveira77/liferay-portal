@@ -1,0 +1,67 @@
+@component-name = "OSB Site Initializer EVP"
+definition {
+
+	var baseURL = PropsUtil.get("portal.url");
+
+	property custom.properties = "feature.flag.LPS-169981=true";
+	property osgi.modules.includes = "osb-site-initializer-evp";
+	property portal.release = "false";
+	property portal.upstream = "true";
+	property release.feature.flags.disable.DISABLE_PRIVATE_LAYOUTS = "true";
+	property testray.main.component.name = "OSB Site Initializer EVP";
+
+	setUp {
+		task ("Set up instance and sign in") {
+			TestCase.setUpPortalInstance();
+
+			User.firstLoginPG();
+		}
+
+		task ("Create a new EVP Site") {
+			EVPUtils.addEVPSite();
+		}
+        
+        
+        task ("Add a manager user") {
+            JSONUser.addUser(
+                userEmailAddress = "manager@liferay.com",
+                userFirstName = "manager",
+                userLastName = "manager",
+                userScreenName = "manager");
+            JSONUser.setFirstPassword(
+                agreeToTermsAndAnswerReminderQuery = "true",
+                requireReset = "false",
+                userEmailAddress = "manager@liferay.com");
+        }
+        task ("Add a manager user with a manager role") {
+            JSONUser.addUserWithRole(
+                roleTitle = "EVP manager",
+                userEmailAddress = "manager@liferay.com",
+                userFirstName = "EVP manager",
+                userLastName = "EVP manager",
+                userScreenName = "EVP manager");
+        }
+        EVPUtils.gotoEVP();
+    }
+    tearDown {
+     var testPortalInstance = PropsUtil.get("test.portal.instance");
+     if (${testPortalInstance} == "true") {
+         PortalInstances.tearDownCP();
+     }
+     else {
+         JSONGroup.deleteGroupByName(groupName = "EVP");
+        }
+    }
+    @description = "This is a test for LPS-184437. Verify that the listing displays the following columns: Organization Name, Status, Country, Contact Name, Contact Phone, Contact Email."
+    @priority = 4
+    test ManagerCanViewColumnsOnListing {
+        task ("When I enter the Organization") {
+        Click(
+            key_entryName = "Organization",
+            locator1 = "ObjectAdmin#VIEW_ENTRY_NAME_ON_PAGE");
+        }
+        task ("Then I confirm that the elements are present") {
+        EVPUtils.assertColumnsPage(columnsList = "Organization Name,Country,Contact Name,Contact Phone,Contact Email,Status");
+         }
+    }
+}
