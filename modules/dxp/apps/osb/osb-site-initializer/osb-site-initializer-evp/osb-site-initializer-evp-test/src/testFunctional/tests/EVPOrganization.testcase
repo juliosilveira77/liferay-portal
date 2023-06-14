@@ -1,0 +1,88 @@
+@component-name = "OSB Site Initializer EVP"
+definition {
+
+	var baseURL = PropsUtil.get("portal.url");
+
+	property custom.properties = "feature.flag.LPS-169981=true";
+	property osgi.modules.includes = "osb-site-initializer-evp";
+	property portal.release = "false";
+	property portal.upstream = "true";
+	property release.feature.flags.disable.DISABLE_PRIVATE_LAYOUTS = "true";
+	property testray.main.component.name = "OSB Site Initializer EVP";
+
+	setUp {
+		task ("Set up instance and sign in") {
+			TestCase.setUpPortalInstance();
+
+			User.firstLoginPG();
+		}
+
+		task ("Create a new EVP Site") {
+			EVPUtils.addEVPSite();
+		}
+
+		task ("Enter the user Employee") {
+			User.logoutAndLoginPG(
+				password = "test",
+				userLoginEmailAddress = "employee@liferay.com");
+		}
+
+		task ("Navigate to EVP Site and Sign In") {
+			EVPUtils.gotoEVP();
+		}
+	}
+
+	tearDown {
+		var testPortalInstance = PropsUtil.get("test.portal.instance");
+
+		if (${testPortalInstance} == "true") {
+			PortalInstances.tearDownCP();
+		}
+		else {
+			JSONGroup.deleteGroupByName(groupName = "EVP Portal");
+		}
+	}
+
+	@description = "This is a test for LPS-172949. Make sure the Edit button can only be clicked when the user role is Financial User."
+	@priority = 5
+	test EmployeeAndManagerCanNotEditOrganization {
+		task ("Given the Employee user are in the Organization page") {
+			EVPNavigator.goToNavItem(navItem = "Organization");
+		}
+
+		task ("When The Employee user click in ellipsis button of an Organization with 'Awaiting Finance Approval' status") {
+			Click(
+				key_name = "Organization 2",
+				locator1 = "EVPUtils#KEBAB_MENU_OPTION_ORGANIZATION");
+		}
+
+		task ("Then the edit button dont appear") {
+			AssertElementNotPresent(
+				key_option = "Edit",
+				locator1 = "EVPUtils#KEBAB_OPTION");
+		}
+
+		task ("Given the Finance user are in the Organization page") {
+			User.logoutAndLoginPG(
+				password = "test",
+				userLoginEmailAddress = "finance@liferay.com");
+
+			EVPUtils.gotoEVP();
+
+			EVPNavigator.goToNavItem(navItem = "Organization");
+		}
+
+		task ("When The Finance user click in ellipsis button of an Organization with 'Awaiting Finance Approval' status") {
+			Click(
+				key_name = "Organization 2",
+				locator1 = "EVPUtils#KEBAB_MENU_OPTION_ORGANIZATION");
+		}
+
+		task ("Then the edit button appear") {
+			AssertElementPresent(
+				key_option = "Edit",
+				locator1 = "EVPUtils#KEBAB_OPTION");
+		}
+	}
+
+}
